@@ -22,12 +22,12 @@ float getPeaktoPeakVoltage0(float v[], int num){
 
 float getAmpitude(float v[]){
 	struct pair p = {0.0};
-	p = getMinMax(v,SIZE);
+	p = getMinMax(v,FFT_N);
 	return(p.max);
 }
 
 float getPeaktoPeakVoltage(float v[]){
-	struct pair p = getMinMax(v,SIZE);
+	struct pair p = getMinMax(v,FFT_N);
 	return(p.max - p.min);
 }
 
@@ -40,11 +40,11 @@ int quantization (float v){
 }
 
 float getfrequency(float v[], int num){
-	int copySample[SIZE]; 
+	int copySample[FFT_N]; 
 	return 0;
 }
 float getfrequency0(float v[]){
-	int copySample[SIZE];
+	int copySample[FFT_N];
 	return 0;
 }
 

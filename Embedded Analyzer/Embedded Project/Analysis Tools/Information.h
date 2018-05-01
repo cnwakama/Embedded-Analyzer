@@ -17,9 +17,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include "ffft.h"
 
 #include "pair.h"
-#define SIZE 1250
+
+//#define SIZE 1250
 
 extern float getAmpitude0(float v[], int num);
 extern float getPeaktoPeakVoltage0(float v[], int num);
