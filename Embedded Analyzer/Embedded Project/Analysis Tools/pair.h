@@ -13,9 +13,12 @@ struct pair
 {
 	float min;
 	float max;
+	int imin;
+	int imax;
 };
 
-extern struct pair getMinMax(float arr[], int n);
+extern struct pair getMinMax(float arr[], int s, int n);
+
 
 
 

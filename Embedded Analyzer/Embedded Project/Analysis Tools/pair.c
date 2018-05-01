@@ -9,7 +9,7 @@
 #include "pair.h"
 
  
-struct pair getMinMax(float arr[], int n)
+struct pair getMinMax(float arr[], int s, int n)
 {
   struct pair minmax;     
   int i;
@@ -18,30 +18,40 @@ struct pair getMinMax(float arr[], int n)
   if (n == 1)
   {
      minmax.max = arr[0];
-     minmax.min = arr[0];     
+     minmax.min = arr[0];
+	 minmax.imax = 0;
+	 minmax.imin = 0;     
      return minmax;
   }    
  
   /* If there are more than one elements, then initialize min 
       and max*/
-  if (arr[0] > arr[1])  
+  if (arr[s] > arr[s+1])  
   {
-      minmax.max = arr[0];
-      minmax.min = arr[1];
+      minmax.max = arr[s];
+      minmax.min = arr[s+1];
+	  minmax.imin = s+1;
+	  minmax.imax = s;
   }  
   else
   {
-      minmax.max = arr[1];
-      minmax.min = arr[0];
+      minmax.max = arr[s+1];
+      minmax.min = arr[s];
+	  minmax.imin = s+1;
+	  minmax.imax = s;
   }    
- 
-  for (i = 2; i<n; i++)
+ s = s+2;
+  for (i = s; i<n; i++)
   {
-    if (arr[i] >  minmax.max)      
+    if (arr[i] >  minmax.max)  {    
       minmax.max = arr[i];
+	  minmax.imax = i;
+	}
    
-    else if (arr[i] <  minmax.min)      
+    else if (arr[i] <  minmax.min) {     
       minmax.min = arr[i];
+	  minmax.min = i;
+	}
   }
    
   return minmax;

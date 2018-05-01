@@ -35,7 +35,7 @@
 #define  COMMAND 0x00
 #define UART_RX_BUFFER_MASK ( RX_BUFFER_SIZE - 1)
 #define RX_BUFFER_SIZE 64
-#define SAMPLE_RATE 6250 //Hz - cant read a frequency that is more than 3125
+#define SAMPLE_RATE 4807 //Hz - cant read a frequency that is more than 2403 Hz
 #include "Information.h"
 
 // uses this and then sets 8N1
@@ -64,9 +64,8 @@ unsigned char usart_getc(void);
 int uart_available(void);
 void getSamples();
 
-static uint16_t VOLTAGESAMPLE[FFT_N];
-static complex_t bfly_buff[FFT_N];
-static uint16_t spektrum[FFT_N/2];
+static int16_t VOLTAGESAMPLE[FFT_N];
+
 
 static int counter = 0;
 char str[35];
@@ -89,12 +88,18 @@ int main(void)
 	
 	
 	while (1){
-		getSamples();
+		//getSamples();
+		printHelloWorld();
+		//printSummary();
 		//checkCommand();
 	}
 	
 	
 	return(1);
+}
+void printHelloWorld(){
+	sprintf(str, "Hello World");
+	usart_prints(str);
 }
 void printSummary(){
 	int i = 0;
@@ -114,22 +119,18 @@ void printSummary(){
 	usart_prints(str);
 	sprintf(str, "Frequency - %f Hz\n\r",freq);
 	usart_prints(str);
-	sprintf(str, "Intervals - %d:%d \n\r",0,100);
+	sprintf(str, "Harmonic Frequency - %d:%d \n\r",0,100);
 	usart_prints(str);
-	sprintf(str, "Note - %s\n\r","A");
-	usart_prints(str);
+	//sprintf(str, "Note - %s\n\r","A");
+	//usart_prints(str);
 }
 void getSamples(){
 	uint8_t ch = 0;
 	uint8_t intsize = (uint8_t) round((1/(SAMPLE_RATE)/FFT_N) * 1000000);
 	
 	for (uint8_t i = 0; i< FFT_N; i++){
-		VOLTAGESAMPLE[i] = adc_read(ch) - 512;
-		//VOLTAGESAMPLE[i] = VOLTAGESAMPLE[i] * 5/1024;
-		//uint8_t val = i*time;
+		VOLTAGESAMPLE[i] = adc_read(ch) - 512; //scaling it back down to used in the fft
 		
-		///sprintf(str, "\n\rt=%d s, v=%f V",val,achf);
-		// usart_prints(str);
 		//delaying
 		for (int j = 0; j<intsize; j++)
 			_delay_us(1);

@@ -1,0 +1,5 @@
+//VOLTAGESAMPLE[i] = VOLTAGESAMPLE[i] * 5/1024;
+		//uint8_t val = i*time;
+		
+		///sprintf(str, "\n\rt=%d s, v=%f V",val,achf);
+		// usart_prints(str);
