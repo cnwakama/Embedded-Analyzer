@@ -32,7 +32,7 @@ int16_t getPeaktoPeakVoltage(int16_t v[]){
 }
 
 float getConversion(float v){
-	 return((255.0/5.0)*(v));
+	 return(((float) 255.0/5.0)*(v));
 }
 
 int quantization (float v){
@@ -53,59 +53,63 @@ float getfrequency(int v[FFT_N], uint16_t s ,int num){
 		if (c == 3)
 			break; 
 	}
-	float ff = (((checks[2]/FFT_N) * SAMPLE_RATE) - ((checks[0]/FFT_N) * SAMPLE_RATE));
+	float ff = ((((float) checks[2]/FFT_N) * SAMPLE_RATE) - (((float) checks[0]/FFT_N) * SAMPLE_RATE));
 	
 	return ff;
 }
 /*void filterHarmonic(uint16_t harmonic[]){
 	int fundfreq = harmonic[0];
 }*/
-void findMaxIntervals(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise, int c){
+void findMaxIntervals(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t c, uint16_t * size){
 	struct pair p = {0,0,0,0};
 	
 	int length = FFT_N/4;
 	while (length < FFT_N/2){
-		p = getMinMax(fft, noise , length);//find the max
+		p = getMinMax(spektrum, noise , length);//find the max
 		if (p.max > theshold)
-		harmonic[c++];
+			harmonic[c++] = p.imax;
 		length += (p.imax - noise);
 		noise = p.imax;
+		(*size)++;
 	}
+	(*size)--;
 }
-void findHarmonic3(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise){
+void findHarmonic3(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t *size){
 	//looking at intervals for find the max
 	//call a max function to return an index
 	//then move the index to foundIndex + 1
 	//if zero is returned as max move it to a new range
 	//zero crossing
-	findMaxIntervals(fft,  theshold, harmonic, noise, 0);
+	findMaxIntervals(theshold, harmonic, noise, 0, size);
 }
-void findHarmonic2(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise){
+void findHarmonic2(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t *size){
 	//finding the max over the whole interval
 	struct pair p = {0,0,0,0};
-	p = getMinMax(fft, noise, FFT_N/2);//find the max
+	p = getMinMax(spektrum, noise, FFT_N/2);//find the max
 	harmonic[0] = p.imax;
-	int c = 1;
+	*size = 1;
 	//could check the interval of max 
 	//or use the filtering function to harmonics
 	//findMaxIntervals(fft,  theshold, harmonic,  p.max + 1, 1);
 	for (int i = p.imax + 1; i < FFT_N/2; i++){
-		if (fft[i] > theshold)
-			harmonic[c++] = i;
+		if (spektrum[i] > theshold)
+			harmonic[(*size)++] = i;
 	}
+	(*size)--;
 }
 /************************************************************************/
 /* Get the fund freq maybe need to add some type of max or maximum for better accuracy                                                                     */
 /************************************************************************/
 //looking at the values that are higher than theshold using the noise variable to get rid of initial reading 
-void findHarmonic1(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise){
+void findHarmonic1(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t *size){
 	//find maximum then look at range 1 from both range of left and right 
-	int c =0;
+	*size =0;
 	for (int i = noise; i<FFT_N/2 + 1; i++){
-		if (fft[i] > theshold)
-			harmonic[c++] = i;
+		if (spektrum[i] > theshold)
+			harmonic[(*size)++] = i;
 		//return ((fft[i]/FFT_N) * SAMPLE_RATE);
 	}
+	(*size)--;
 	/*return ((fft[0]/FFT_N) * SAMPLE_RATE);
 	for (int i = 0; i<FFT_N/2 + 1; i++){
 		if (fft[i] > theshold)
@@ -121,10 +125,10 @@ void getfft(int v[FFT_N]){
 	
 }
 /************************************************************************/
-/*   Uses fft to get a spektrum                                                                   */
+/*   Uses fft (spektrum) to get a frequency                                                                    */
 /************************************************************************/
-/*float getfrequencyfft(int v [FFT_N]){
-	
-}*/
+float getfrequencyfft(uint16_t s [FFT_N/2], uint16_t f){
+	return (( (float) s[f]/FFT_N) * 1.0 * SAMPLE_RATE);
+}
 
 

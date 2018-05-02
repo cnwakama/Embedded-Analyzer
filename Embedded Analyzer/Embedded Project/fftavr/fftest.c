@@ -89,7 +89,7 @@ int main (void)
 				for (n = 0; n < FFT_N; n++) {
 					s = capture[n];
 					xmitf(PSTR("\r\n%4u:%6d "), n, s);
-					s = (s + 32768) / 1024;
+					s = (s + 32768) / 1024; //1024 is the size of the sample and 32768 is the revoluation at 16 bits but mine is 10 not 16
 					for (m = 0; m < s; m++) xmit(' ');
 					xmit('*');
 				}

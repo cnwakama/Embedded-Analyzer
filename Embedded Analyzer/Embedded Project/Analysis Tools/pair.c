@@ -9,7 +9,7 @@
 #include "pair.h"
 
  
-struct pair getMinMax(float arr[], int s, int n)
+struct pair getMinMax(int arr[], int s, int n)
 {
   struct pair minmax;     
   int i;

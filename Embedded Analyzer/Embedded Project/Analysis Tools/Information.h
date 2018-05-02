@@ -33,12 +33,13 @@ extern int16_t getAmpitude(int16_t v[]);
 extern int16_t getPeaktoPeakVoltage(int16_t v[]);
 extern float getConversion(float v);
 extern int16_t quantization (float v);
-extern float getfrequency(int v[FFT_N], uint16_t s ,int num);
-extern void getfft(int v[FFT_N]);
-extern void findMaxIntervals(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise, int c);
-extern void findHarmonic3(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise);
-extern void findHarmonic2(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise);
-extern void findHarmonic1(uint16_t fft[FFT_N/2], int theshold, uint16_t harmonic[], int noise);
+extern float getfrequency(int16_t v[FFT_N], uint16_t s ,int num);
+extern void getfft(int16_t v[FFT_N]);
+extern void findMaxIntervals(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t c, uint16_t * size);
+extern void findHarmonic3(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t *size);
+extern void findHarmonic2(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t *size);
+extern void findHarmonic1(uint16_t theshold, uint16_t harmonic[], uint16_t noise, uint16_t *size);
+extern float getfrequencyfft(uint16_t s [FFT_N/2], uint16_t f);
 //
 //
 #endif INFORMATION_H_ 

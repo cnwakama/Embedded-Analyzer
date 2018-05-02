@@ -51,24 +51,34 @@ volatile unsigned char rx_buffer_tail;
 
 // Function prototypes.
 unsigned char uart_buffer_empty(void);
+void usart_init(void);
 void usart_prints(const char *ptr);
 void usart_printf(const char *ptr);
-
-
 void usart_putc(const char c); //look at size
+unsigned char usart_getc(void);
+int uart_available(void);
+
 void adc_init();
 uint16_t adc_read(uint8_t ch);
-void usart_init(void);
-unsigned char usart_getc(void);
-
-int uart_available(void);
 void getSamples();
+void displayfreqharmonics();
+void displayWaveform();
+void displaySpectrum();
+void printHelloWorld();
+void printSummary();
+void analysis();
 
+
+static int16_t counter = 1;
 static int16_t VOLTAGESAMPLE[FFT_N];
-
-
-static int counter = 0;
-char str[35];
+static const uint16_t NOISE = 4;
+static const uint16_t VOLTAGENOISE = 2;
+static float amplitude;
+static float ptp;
+static float frequencies;
+static float harmonics[FFT_N/4];
+static uint16_t numberOfHarmonics = 0;
+char str[45];
 
 
 int main(void)
@@ -82,14 +92,17 @@ int main(void)
 	//sprintf(q,"\n\r");
 	
 	
-	/*char ho[25]; 
-	sprintf(ho, "Hello World\n\r");
-	usart_prints(ho);*/
+	//char ho[25]; 
+	//sprintf(ho, "Hello World\n\r");
+	//usart_prints(ho);
+	printHelloWorld();
 	
 	
 	while (1){
 		//getSamples();
-		printHelloWorld();
+		//analysis();
+		//printSummary();
+		//printHelloWorld();
 		//printSummary();
 		//checkCommand();
 	}
@@ -97,32 +110,96 @@ int main(void)
 	
 	return(1);
 }
+void analysis(){
+	//amplitude 
+	//peak-to-peak
+	//fundamental frequency
+	//harmonic frequency
+	//int i = 0;
+	amplitude = getAmpitude(VOLTAGESAMPLE);
+	amplitude = getConversion(amplitude);
+	ptp = getPeaktoPeakVoltage(VOLTAGESAMPLE);
+	ptp = getConversion(ptp);
+	frequencies = getfrequency(VOLTAGESAMPLE, VOLTAGENOISE, FFT_N); //Zero-Crossing Method
+	getfft(VOLTAGESAMPLE);
+	//findHarmonic1(2, harmonics, NOISE);
+	findHarmonic2(2, harmonics, NOISE, &numberOfHarmonics);
+	//findHarmonic3(2, harmonics, NOISE);
+	
+}
 void printHelloWorld(){
 	sprintf(str, "Hello World");
 	usart_prints(str);
 }
 void printSummary(){
-	int i = 0;
-	float amplitude[10];
-	float ptp[10];
-	amplitude[i] = getAmpitude(VOLTAGESAMPLE);
-	amplitude[i] = getConversion(amplitude[i]);
-	ptp[0] = getPeaktoPeakVoltage(VOLTAGESAMPLE);
-	float freq = 0.0;
-	sprintf(str, "Analysis Summary - Sample\%d\n\r",counter);
+	sprintf(str, "Analysis Summary of Signal Sample \%d\n\r",counter++);
 	usart_prints(str);
 	sprintf(str, "-----------------------------\n\r");
 	usart_prints(str);
-	sprintf(str, "Amplitude - %f V\n\r",amplitude[i]);
+	displayWaveform();
+	sprintf(str, "\t");
 	usart_prints(str);
-	sprintf(str, "Peak to Peak - %f V\n\r",ptp[i]);
+	sprintf(str, "Waveform\n\r");
 	usart_prints(str);
-	sprintf(str, "Frequency - %f Hz\n\r",freq);
+	displaySpectrum();
+	sprintf(str, "\t");
 	usart_prints(str);
-	sprintf(str, "Harmonic Frequency - %d:%d \n\r",0,100);
+	sprintf(str, "Spectrum\n\r");
 	usart_prints(str);
+	sprintf(str, "Amplitude - %f V\n\r",amplitude);
+	usart_prints(str);
+	sprintf(str, "Peak to Peak - %f V\n\r",ptp);
+	usart_prints(str);
+	sprintf(str, "Fundamental Frequency (Zero-Crossing) - %f Hz\n\r",frequencies);
+	usart_prints(str);
+	sprintf(str, "Fundamental Frequency (FFT) - %f Hz\n\r", getfrequencyfft(spektrum,harmonics[0]));
+	usart_prints(str);
+	sprintf(str, "Harmonic Frequencies");
+	usart_prints(str);
+	sprintf(str, "Number of Harmonics - %d\n\r", numberOfHarmonics);
+	usart_prints(str);
+	displayfreqharmonics();
+	//display frequencies of harmonics
 	//sprintf(str, "Note - %s\n\r","A");
 	//usart_prints(str);
+}
+void displayfreqharmonics(){
+	for (int i = 1; i <= numberOfHarmonics; i++){
+		sprintf(str, "Harmonic %d\t", i);
+		usart_prints(str);
+	}
+	sprintf(str, "\n\r");
+	usart_prints(str);
+	for (int i = 1; i <= numberOfHarmonics; i++){
+		sprintf(str, "-------- \t");
+		usart_prints(str);
+	}
+	for (int i = 1; i <= numberOfHarmonics; i++){
+		sprintf(str, "Frequency %f Hz\t",  getfrequencyfft(spektrum,harmonics[i]));
+		usart_prints(str);
+	}
+	//display phases maybe
+	//display a view of the frequency for each harmonics
+	
+}
+void displaySpectrum(){
+	uint16_t m, n, s;
+	for (n = 0; n < FFT_N / 2; n++) {
+		s = spektrum[n];
+		xmitf(PSTR("\r\n%4u:%5u "), n, s);
+		s /= (FFT_N * 2);
+		for (m = 0; m < s; m++) xmit('*');
+	}
+}
+void displayWaveform(){
+	uint16_t m, n, s;
+	for (n = 0; n < FFT_N; n++) {
+		s = VOLTAGESAMPLE[n];
+		xmitf(PSTR("\r\n%4u:%6d "), n, s);
+		s = (s + 512) / (FFT_N *4); //1024 is the size of the sample and 32768 is the revoluation at 16 bits but mine is 10 not 16
+		for (m = 0; m < s; m++) xmit(' ');
+		xmit('*');
+	}
 }
 void getSamples(){
 	uint8_t ch = 0;
